@@ -1,0 +1,4 @@
+uagents>=0.22.3
+python-dotenv
+requests
+pyjwt
