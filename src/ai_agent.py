@@ -1,13 +1,11 @@
 import json
 import os
 from datetime import datetime
-from llm import get_completion
 from uagents_core.contrib.protocols.chat import ChatMessage, ChatAcknowledgement, TextContent, chat_protocol_spec
-from uagents import Agent, Context, Protocol, Model
+from uagents import Agent, Context, Protocol
 from uuid import uuid4
 from dotenv import load_dotenv
 import json
-import logging
 from datetime import datetime
 from dotenv import load_dotenv
 import requests
