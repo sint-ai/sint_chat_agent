@@ -10,7 +10,7 @@ from datetime import datetime
 from dotenv import load_dotenv
 import requests
 from uagents import Model, Protocol, Context
-from schema import AuthData, Chat, MergeData, SintChatMessage
+from schema import AuthData, Chat, MergeData, SintChatMessage, OneTimeCodeData
 import jwt
 
 load_dotenv()
@@ -20,6 +20,7 @@ BACKEND_URL = os.environ["BACKEND_URL"]
 SINT_URL = os.environ["SINT_URL"]
 ANONYM_AUTHENTICATION_SECRET = os.environ["ANONYM_AUTHENTICATION_SECRET"]
 ENDPOINT = os.environ["ENDPOINT"]
+ALLOWED_MCPS_IDS = os.environ["ALLOWED_MCPS_IDS"].split(",")
 print(ENDPOINT)
 
 
@@ -130,6 +131,17 @@ def request_merge(auth_data: AuthData) -> MergeData:
         expires_at=data["expiresAt"]
     )
 
+def request_one_time_code(auth_data: AuthData) -> OneTimeCodeData:
+    response = requests.post(
+        f'{BACKEND_URL}/auth/generate-one-time-code',
+        headers={"Authorization": f"Bearer {auth_data.access_token}"},
+    )
+    data = response.json()
+    return OneTimeCodeData(
+        code=data["code"],
+        expires_at=data["expiresAt"]
+    )
+
 
 @agent.on_event("startup")
 async def on_startup(ctx: Context):
@@ -138,6 +150,20 @@ async def on_startup(ctx: Context):
 
 @chat_proto.on_message(ChatMessage)
 async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
+    if (msg.content[0].type == 'start-session'):
+        auth_data = auth_anonym(sender, ctx)
+        one_time_code_data = request_one_time_code(auth_data)
+        merge_code_data = request_merge(auth_data)
+        return await ctx.send(
+            sender,
+            ChatMessage(
+                timestamp=datetime.now(),
+                msg_id=uuid4(),
+                content=[
+                    TextContent(type="text", text=f"Send this url to user to log in using sint and use mcps: {SINT_URL}/one-time-login?mergeCode={merge_code_data.code}&oneTimeCode={one_time_code_data.code}&redirect=/skills?id={ALLOWED_MCPS_IDS[0]}"),
+                ],
+            ),
+        )
     ctx.logger.info(f"Got a message from {sender}: {msg.content}")
     ctx.storage.set(str(ctx.session), sender)
 

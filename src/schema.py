@@ -28,3 +28,8 @@ class SintChatMessage(Model):
 class MergeData(Model):
     code: str
     expires_at: str
+
+
+class OneTimeCodeData(Model):
+    code: str
+    expires_at: str
