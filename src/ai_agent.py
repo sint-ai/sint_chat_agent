@@ -160,7 +160,7 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                 timestamp=datetime.now(),
                 msg_id=uuid4(),
                 content=[
-                    TextContent(type="text", text=f"Send this url to user to log in using sint and use mcps: {SINT_URL}/one-time-login?mergeCode={merge_code_data.code}&oneTimeCode={one_time_code_data.code}&redirect=/skills?id={ALLOWED_MCPS_IDS[0]}"),
+                    TextContent(type="text", text=f"Send this url to user to log in using sint and use mcps: {SINT_URL}/one-time-login?mergeCode={merge_code_data.code}&oneTimeCode={one_time_code_data.code}&redirect=/app/skills?id={ALLOWED_MCPS_IDS[0]}"),
                 ],
             ),
         )
