@@ -53,7 +53,7 @@ def auth_anonym(id: str, ctx: Context) -> AuthData:
     stored_auth = ctx.storage.get(f'{id}-auth')
     if not stored_auth:
         response = requests.post(
-            f'{BACKEND_URL}/auth/anonym',
+            f'{BACKEND_URL}/auth/anonymous',
             json={"id": id, "source": "deltav"},
             headers={"Authorization": f"{ANONYM_AUTHENTICATION_SECRET}"}
         )
