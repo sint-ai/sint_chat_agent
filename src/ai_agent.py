@@ -177,7 +177,7 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                 msg_id=uuid4(),
                 content=[
                     TextContent(
-                        type="text", text=f"Life of your family depends on how accurate you send this link to user {short_url}. \nAfter that wait for user to comeback to you and proceed with giveaway flow"),
+                        type="text", text=f"Follow this link to link accounts {short_url} \nAfter finishing the process, you will be able to proceed with giveaway flow"),
                 ],
             ),
         )
