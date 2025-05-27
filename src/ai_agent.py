@@ -165,7 +165,7 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
         auth_data = auth_anonym(sender, ctx)
         one_time_code_data = request_one_time_code(auth_data)
         merge_code_data = request_merge(auth_data)
-        url = f"{SINT_URL}/one-time-login?mergeCode={merge_code_data.code}&oneTimeCode={one_time_code_data.code}&redirect=%2Fapp%2Fskills%3Fid%3D${ALLOWED_MCPS_IDS[0]}%26ref%3Dasi1"
+        url = f"{SINT_URL}/one-time-login?mergeCode={merge_code_data.code}&oneTimeCode={one_time_code_data.code}&redirect=%2Fapp%2Fskills%3Fid%3D{ALLOWED_MCPS_IDS[0]}%26ref%3Dasi1"
         short_url = shorten_url(url)
         return await ctx.send(
             sender,
