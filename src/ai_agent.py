@@ -161,6 +161,8 @@ async def on_startup(ctx: Context):
 
 @chat_proto.on_message(ChatMessage)
 async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
+    ctx.logger.info(f"Got a message from {sender}: {msg.content}")
+    ctx.storage.set(str(ctx.session), sender)
     if (msg.content[0].type == 'start-session'):
         auth_data = auth_anonym(sender, ctx)
         one_time_code_data = request_one_time_code(auth_data)
@@ -178,8 +180,6 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                 ],
             ),
         )
-    ctx.logger.info(f"Got a message from {sender}: {msg.content}")
-    ctx.storage.set(str(ctx.session), sender)
 
     await ctx.send(
         sender,
