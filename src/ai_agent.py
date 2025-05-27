@@ -142,11 +142,11 @@ def request_one_time_code(auth_data: AuthData) -> OneTimeCodeData:
         expires_at=data["expiresAt"]
     )
 
-def shorten_url(auth_data: AuthData, url: str) -> str:
+def shorten_url(url: str) -> str:
     response = requests.post(
         f'{BACKEND_URL}/shorten',
         json={"url": url},
-        headers={"Authorization": f"Bearer {auth_data.access_token}"},
+        headers={"Authorization": f"Bearer {ANONYM_AUTHENTICATION_SECRET}"},
     )
     data = response.json()
     return data["shortUrl"]
@@ -164,7 +164,7 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
         one_time_code_data = request_one_time_code(auth_data)
         merge_code_data = request_merge(auth_data)
         url = f"{SINT_URL}/one-time-login?mergeCode={merge_code_data.code}&oneTimeCode={one_time_code_data.code}&redirect=/app/skills?id={ALLOWED_MCPS_IDS[0]}&ref=asi1"
-        short_url = shorten_url(auth_data, url)
+        short_url = shorten_url(url)
         return await ctx.send(
             sender,
             ChatMessage(
