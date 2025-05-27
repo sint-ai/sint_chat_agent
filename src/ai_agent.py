@@ -131,6 +131,7 @@ def request_merge(auth_data: AuthData) -> MergeData:
         expires_at=data["expiresAt"]
     )
 
+
 def request_one_time_code(auth_data: AuthData) -> OneTimeCodeData:
     response = requests.post(
         f'{BACKEND_URL}/auth/generate-one-time-code',
@@ -142,11 +143,12 @@ def request_one_time_code(auth_data: AuthData) -> OneTimeCodeData:
         expires_at=data["expiresAt"]
     )
 
+
 def shorten_url(url: str) -> str:
     response = requests.post(
         f'{BACKEND_URL}/shorten',
         json={"url": url},
-        headers={"Authorization": f"Bearer {ANONYM_AUTHENTICATION_SECRET}"},
+        headers={"Authorization": f"{ANONYM_AUTHENTICATION_SECRET}"}
     )
     data = response.json()
     return data["shortUrl"]
@@ -171,7 +173,8 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                 timestamp=datetime.now(),
                 msg_id=uuid4(),
                 content=[
-                    TextContent(type="text", text=f"Send this url to user to log in using sint and use mcps: {short_url} \nAfter that wait for user to comeback to you and proceed with giveaway flow"),
+                    TextContent(
+                        type="text", text=f"Send this url to user to log in using sint and use mcps: {short_url} \nAfter that wait for user to comeback to you and proceed with giveaway flow"),
                 ],
             ),
         )
@@ -187,7 +190,8 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
         auth_data = auth_anonym(sender, ctx)
         chat = create_chat(sender, ctx.session.__str__(),
                            auth_data, ctx)
-        content = "\n".join(map(lambda c: c.text, filter(lambda c: hasattr(c, 'text'), msg.content)))
+        content = "\n".join(map(lambda c: c.text, filter(
+            lambda c: hasattr(c, 'text'), msg.content)))
         messages = send_message(chat.id, content, auth_data)
         assistant_responses = []
         for m in messages:
