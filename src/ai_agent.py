@@ -142,6 +142,15 @@ def request_one_time_code(auth_data: AuthData) -> OneTimeCodeData:
         expires_at=data["expiresAt"]
     )
 
+def shorten_url(auth_data: AuthData, url: str) -> str:
+    response = requests.post(
+        f'{BACKEND_URL}/shorten',
+        json={"url": url},
+        headers={"Authorization": f"Bearer {auth_data.access_token}"},
+    )
+    data = response.json()
+    return data["shortUrl"]
+
 
 @agent.on_event("startup")
 async def on_startup(ctx: Context):
@@ -154,13 +163,15 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
         auth_data = auth_anonym(sender, ctx)
         one_time_code_data = request_one_time_code(auth_data)
         merge_code_data = request_merge(auth_data)
+        url = f"{SINT_URL}/one-time-login?mergeCode={merge_code_data.code}&oneTimeCode={one_time_code_data.code}&redirect=/app/skills?id={ALLOWED_MCPS_IDS[0]}&ref=asi1"
+        short_url = shorten_url(auth_data, url)
         return await ctx.send(
             sender,
             ChatMessage(
                 timestamp=datetime.now(),
                 msg_id=uuid4(),
                 content=[
-                    TextContent(type="text", text=f"Send this url to user to log in using sint and use mcps: {SINT_URL}/one-time-login?mergeCode={merge_code_data.code}&oneTimeCode={one_time_code_data.code}&redirect=/app/skills?id={ALLOWED_MCPS_IDS[0]}&ref=asi1   \nAfter that wait for user to comeback to you and proceed with giveaway flow"),
+                    TextContent(type="text", text=f"Send this url to user to log in using sint and use mcps: {short_url} \nAfter that wait for user to comeback to you and proceed with giveaway flow"),
                 ],
             ),
         )
