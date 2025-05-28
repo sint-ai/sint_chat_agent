@@ -163,13 +163,16 @@ async def on_startup(ctx: Context):
 async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
     ctx.logger.info(
         f"Got a message from {sender} in session {str(ctx.session)}: {msg.content}")
-    if (msg.content[0].type == 'start-session' and not ctx.storage.has(str(ctx.session))):
+    if not ctx.storage.has(str(ctx.session)):
         auth_data = auth_anonym(sender, ctx)
         one_time_code_data = request_one_time_code(auth_data)
         merge_code_data = request_merge(auth_data)
         url = f"{SINT_URL}/one-time-login?mergeCode={merge_code_data.code}&oneTimeCode={one_time_code_data.code}&redirect=%2Fapp%2Fskills%3Fid%3D{ALLOWED_MCPS_IDS[0]}%26ref%3Dasi1"
         short_url = shorten_url(url)
         ctx.storage.set(str(ctx.session), sender)
+        message_text = f"**Hey, I'm SINT!** \nWelcome to the **SINT & Fetch Giveaway!**\n\nTo start enable [**Giveaway skill**]({short_url})\nAfter that comeback to agentverse and i'll guide you every step of the way.\nLet’s start chatting and get you in the game!"
+        if msg.content[0].type == 'start-session':
+            message_text = f"Follow this link to link accounts {short_url} \nAfter finishing the process, you will be able to proceed with giveaway flow"
         return await ctx.send(
             sender,
             ChatMessage(
@@ -177,7 +180,7 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                 msg_id=uuid4(),
                 content=[
                     TextContent(
-                        type="text", text=f"Follow this link to link accounts {short_url} \nAfter finishing the process, you will be able to proceed with giveaway flow"),
+                        type="text", text=message_text),
                 ],
             ),
         )
