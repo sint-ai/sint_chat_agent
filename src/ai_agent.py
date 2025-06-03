@@ -1,7 +1,7 @@
 import json
 import os
 from datetime import datetime
-from uagents_core.contrib.protocols.chat import ChatMessage, ChatAcknowledgement, TextContent, chat_protocol_spec
+from uagents_core.contrib.protocols.chat import ChatMessage, ChatAcknowledgement, TextContent, chat_protocol_spec, ResourceContent, Resource
 from uagents import Agent, Context, Protocol
 from uuid import uuid4
 from dotenv import load_dotenv
@@ -179,8 +179,19 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                 timestamp=datetime.now(),
                 msg_id=uuid4(),
                 content=[
+                    ResourceContent(
+                        type="resource",
+                        resource_id=uuid4(),
+                        resource=Resource(
+                            uri=short_url,
+                            metadata={
+                                "role": "link"
+                            }
+                        )
+                    ),
                     TextContent(
-                        type="text", text=message_text),
+                        type="text", text=message_text
+                    ),
                 ],
             ),
         )
