@@ -179,6 +179,9 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                 timestamp=datetime.now(),
                 msg_id=uuid4(),
                 content=[
+                    TextContent(
+                        type="text", text=message_text
+                    ),
                     ResourceContent(
                         type="resource",
                         resource_id=uuid4(),
@@ -188,9 +191,6 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                                 "role": "link"
                             }
                         )
-                    ),
-                    TextContent(
-                        type="text", text=message_text
                     ),
                 ],
             ),
