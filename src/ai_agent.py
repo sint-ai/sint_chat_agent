@@ -156,18 +156,6 @@ def shorten_url(url: str) -> str:
 
 
 def _process_response_for_jpeg_images(text: str) -> tuple[str, list[ResourceContent]]:
-    """
-    Processes a response string to find and extract JPEG image URLs,
-    removes them from the text, and creates ResourceContent objects for them.
-
-    Args:
-        response_text: The original text response which may contain markdown JPEG links.
-
-    Returns:
-        A tuple containing:
-            - The cleaned text with markdown JPEG links removed.
-            - A list of ResourceContent objects for the extracted JPEG images.
-    """
     image_resources: list[ResourceContent] = []
     # Regex to find markdown image links for .jpeg files
     # Example: [My Image](http://example.com/image.jpeg)
@@ -265,14 +253,14 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                     assistant_responses.append(m.content)
         assistant_response_original = "\n".join(assistant_responses)
 
-        cleaned_response_text, image_resources = _process_response_for_jpeg_images(
-            assistant_response_original)
+        # cleaned_response_text, image_resources = _process_response_for_jpeg_images(
+        #     assistant_response_original)
 
         message_content_parts = [
-            TextContent(type="text", text=cleaned_response_text)
+            TextContent(type="text", text=assistant_response_original)
         ]
-        if image_resources:
-            message_content_parts.extend(image_resources)
+        # if image_resources:
+        #     message_content_parts.extend(image_resources)
 
         await ctx.send(sender, ChatMessage(
             timestamp=datetime.now(),
