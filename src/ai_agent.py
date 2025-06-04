@@ -172,7 +172,7 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
         ctx.storage.set(str(ctx.session), sender)
         message_text = f"**Hey, I'm SINT!** \nWelcome to the **SINT & Fetch Giveaway!**\n\nTo start enable giveaway skill by following the link bellow\nAfter that comeback to agentverse and i'll guide you every step of the way.\nLet’s start chatting and get you in the game!"
         if msg.content[0].type == 'start-session':
-            message_text = f"Click the link to connect your accounts and activate Giveaway skill.\nOnce you’re done, we’ll dive right into the action!"
+            message_text = f"**Click the link to connect your accounts and activate the giveaway skill.**\nOnce completed, you’ll be able to continue with the giveaway flow."
         return await ctx.send(
             sender,
             ChatMessage(
