@@ -12,6 +12,7 @@ import requests
 from uagents import Model, Protocol, Context
 from schema import AuthData, Chat, MergeData, SintChatMessage, OneTimeCodeData
 import jwt
+import re
 
 load_dotenv()
 
@@ -154,6 +155,51 @@ def shorten_url(url: str) -> str:
     return data["shortUrl"]
 
 
+def _process_response_for_jpeg_images(text: str) -> tuple[str, list[ResourceContent]]:
+    """
+    Processes a response string to find and extract JPEG image URLs,
+    removes them from the text, and creates ResourceContent objects for them.
+
+    Args:
+        response_text: The original text response which may contain markdown JPEG links.
+
+    Returns:
+        A tuple containing:
+            - The cleaned text with markdown JPEG links removed.
+            - A list of ResourceContent objects for the extracted JPEG images.
+    """
+    image_resources: list[ResourceContent] = []
+    # Regex to find markdown image links for .jpeg files
+    # Example: [My Image](http://example.com/image.jpeg)
+    jpeg_image_pattern = r'\[([^\]]*)\]\(([^)]+\.jpeg)\)'
+
+    extracted_jpeg_urls: list[str] = []
+    matches = re.findall(jpeg_image_pattern, text)
+
+    if matches:
+        for _image_name, image_url in matches:
+            if image_url not in extracted_jpeg_urls:  # Avoid duplicate resources
+                extracted_jpeg_urls.append(image_url)
+
+    cleaned_text = re.sub(jpeg_image_pattern, '', text).strip()
+
+    for url in extracted_jpeg_urls:
+        image_resources.append(
+            ResourceContent(
+                type="resource",
+                resource_id=uuid4(),
+                resource=Resource(
+                    uri=url,
+                    metadata={
+                        "role": "image",
+                        "mime_type": "image/jpeg"
+                    }
+                )
+            )
+        )
+    return cleaned_text, image_resources
+
+
 @agent.on_event("startup")
 async def on_startup(ctx: Context):
     ctx.logger.info(agent.address)
@@ -217,13 +263,21 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                         assistant_responses.append(parsed["content"])
                 except json.JSONDecodeError:
                     assistant_responses.append(m.content)
-        assistant_response = "\n".join(assistant_responses)
+        assistant_response_original = "\n".join(assistant_responses)
+
+        cleaned_response_text, image_resources = _process_response_for_jpeg_images(
+            assistant_response_original)
+
+        message_content_parts = [
+            TextContent(type="text", text=cleaned_response_text)
+        ]
+        if image_resources:
+            message_content_parts.extend(image_resources)
+
         await ctx.send(sender, ChatMessage(
             timestamp=datetime.now(),
             msg_id=uuid4(),
-            content=[
-                TextContent(type="text", text=assistant_response)
-            ],
+            content=message_content_parts,
         ))
     except Exception as e:
         print(f"Error processing message: {str(e)}")
