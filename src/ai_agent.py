@@ -95,9 +95,11 @@ def auth_anonym(id: str, ctx: Context) -> AuthData:
 
 def create_chat(sender: str, session_id: str, auth_data: AuthData, ctx: Context) -> Chat:
     stored_chat = ctx.storage.get(f'{sender}-{session_id}')
+    chat_dict = None
     try:
-        chat_dict = json.loads(stored_chat)
-    except json.JSONDecodeError:
+        if stored_chat:
+            chat_dict = json.loads(stored_chat)
+    except:
         chat_dict = None
 
     if chat_dict:
