@@ -29,7 +29,6 @@ print(ENDPOINT)
 chat_proto = Protocol(spec=chat_protocol_spec)
 
 
-# Ensure storage directory exists
 storage_dir = "./storage"
 if not os.path.exists(storage_dir):
     os.makedirs(storage_dir)
@@ -41,8 +40,9 @@ agent = Agent(
     proxy=True,
     endpoint=(ENDPOINT),
     publish_agent_details=True,
-    storage=KeyValueStore("local", cwd=os.path.join(os.getcwd(), storage_dir))
 )
+agent._storage = KeyValueStore(
+    "local", cwd=os.path.join(os.getcwd(), storage_dir))
 
 
 def is_token_expired(token: str, ctx: Context) -> bool:
