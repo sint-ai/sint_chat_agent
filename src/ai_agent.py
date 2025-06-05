@@ -63,7 +63,7 @@ def auth_anonym(id: str, ctx: Context) -> AuthData:
     try:
         if stored_auth:
             auth_dict = json.loads(stored_auth)
-    except json.JSONDecodeError:
+    except:
         auth_dict = None
     
     if auth_dict:
