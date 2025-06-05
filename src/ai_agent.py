@@ -1,4 +1,5 @@
 import json
+import traceback
 import os
 from datetime import datetime
 from uagents_core.contrib.protocols.chat import ChatMessage, ChatAcknowledgement, TextContent, chat_protocol_spec, ResourceContent, Resource
@@ -283,7 +284,7 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
             content=message_content_parts,
         ))
     except Exception as e:
-        print(f"Error processing message: {str(e)}")
+        print(f"Error processing message: {str(e)}\n{traceback.format_exc()}")
         await ctx.send(sender, ChatMessage(
             timestamp=datetime.now(),
             msg_id=uuid4(),
