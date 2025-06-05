@@ -13,6 +13,7 @@ from uagents import Model, Protocol, Context
 from schema import AuthData, Chat, MergeData, SintChatMessage, OneTimeCodeData
 import jwt
 import re
+from uagents.storage import KeyValueStore
 
 load_dotenv()
 
@@ -28,6 +29,11 @@ print(ENDPOINT)
 chat_proto = Protocol(spec=chat_protocol_spec)
 
 
+# Ensure storage directory exists
+storage_dir = "./storage"
+if not os.path.exists(storage_dir):
+    os.makedirs(storage_dir)
+
 agent = Agent(
     name="Sint Chat",
     seed=SEED,
@@ -35,6 +41,7 @@ agent = Agent(
     proxy=True,
     endpoint=(ENDPOINT),
     publish_agent_details=True,
+    storage=KeyValueStore("local", cwd=os.path.join(os.getcwd(), storage_dir))
 )
 
 
@@ -81,7 +88,17 @@ def auth_anonym(id: str, ctx: Context) -> AuthData:
 
 def create_chat(sender: str, session_id: str, auth_data: AuthData, ctx: Context) -> Chat:
     stored_chat = ctx.storage.get(f'{sender}-{session_id}')
-    if not stored_chat:
+    try:
+        chat_dict = json.loads(stored_chat)
+    except:
+        chat_dict = None
+
+    if chat_dict:
+        return Chat(id=chat_dict["id"],
+                    user_id=chat_dict["user_id"],
+                    name=chat_dict["name"],
+                    created_at=chat_dict["created_at"])
+    else:
         response = requests.post(
             f'{BACKEND_URL}/chats',
             json={"name": session_id},
@@ -96,14 +113,6 @@ def create_chat(sender: str, session_id: str, auth_data: AuthData, ctx: Context)
         )
         ctx.storage.set(f'{sender}-{session_id}', json.dumps(chat.dict()))
         return chat
-    else:
-        chat_dict = json.loads(stored_chat)
-        return Chat(
-            id=chat_dict["id"],
-            user_id=chat_dict["user_id"],
-            name=chat_dict["name"],
-            created_at=chat_dict["created_at"]
-        )
 
 
 def send_message(chat_id: int, message: str, auth_data: AuthData) -> list[SintChatMessage]:
