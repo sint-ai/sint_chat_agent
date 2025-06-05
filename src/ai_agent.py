@@ -59,7 +59,22 @@ def is_token_expired(token: str, ctx: Context) -> bool:
 
 def auth_anonym(id: str, ctx: Context) -> AuthData:
     stored_auth = ctx.storage.get(f'{id}-auth')
-    if not stored_auth:
+    try:
+        auth_dict = json.loads(stored_auth)
+    except json.JSONDecodeError:
+        auth_dict = None
+    
+    if auth_dict:
+        auth_data = AuthData(
+            user_id=auth_dict["user_id"],
+            access_token=auth_dict["access_token"],
+            refresh_token=auth_dict["refresh_token"]
+        )
+        if is_token_expired(auth_data.access_token, ctx):
+            ctx.storage.remove(f'{id}-auth')
+            return auth_anonym(id, ctx)
+        return auth_data
+    else:
         response = requests.post(
             f'{BACKEND_URL}/auth/anonymous',
             json={"id": id, "source": "deltav"},
@@ -73,24 +88,13 @@ def auth_anonym(id: str, ctx: Context) -> AuthData:
         )
         ctx.storage.set(f'{id}-auth', json.dumps(auth_data.dict()))
         return auth_data
-    else:
-        auth_dict = json.loads(stored_auth)
-        auth_data = AuthData(
-            user_id=auth_dict["user_id"],
-            access_token=auth_dict["access_token"],
-            refresh_token=auth_dict["refresh_token"]
-        )
-        if is_token_expired(auth_data.access_token, ctx):
-            ctx.storage.remove(f'{id}-auth')
-            return auth_anonym(id, ctx)
-        return auth_data
 
 
 def create_chat(sender: str, session_id: str, auth_data: AuthData, ctx: Context) -> Chat:
     stored_chat = ctx.storage.get(f'{sender}-{session_id}')
     try:
         chat_dict = json.loads(stored_chat)
-    except:
+    except json.JSONDecodeError:
         chat_dict = None
 
     if chat_dict:
