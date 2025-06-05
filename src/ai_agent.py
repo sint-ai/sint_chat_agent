@@ -59,6 +59,7 @@ def is_token_expired(token: str, ctx: Context) -> bool:
 
 def auth_anonym(id: str, ctx: Context) -> AuthData:
     stored_auth = ctx.storage.get(f'{id}-auth')
+    auth_dict = None
     try:
         if stored_auth:
             auth_dict = json.loads(stored_auth)
