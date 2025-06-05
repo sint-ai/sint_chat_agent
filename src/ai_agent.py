@@ -253,14 +253,14 @@ async def handle_message(ctx: Context, sender: str, msg: ChatMessage):
                     assistant_responses.append(m.content)
         assistant_response_original = "\n".join(assistant_responses)
 
-        # cleaned_response_text, image_resources = _process_response_for_jpeg_images(
-        #     assistant_response_original)
+        cleaned_response_text, image_resources = _process_response_for_jpeg_images(
+            assistant_response_original)
 
         message_content_parts = [
-            TextContent(type="text", text=assistant_response_original)
+            TextContent(type="text", text=cleaned_response_text)
         ]
-        # if image_resources:
-        #     message_content_parts.extend(image_resources)
+        if image_resources:
+            message_content_parts.extend(image_resources)
 
         await ctx.send(sender, ChatMessage(
             timestamp=datetime.now(),
